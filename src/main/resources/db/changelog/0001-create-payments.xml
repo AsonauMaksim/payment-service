@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="
+          http://www.liquibase.org/xml/ns/dbchangelog
+          https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd
+          http://www.liquibase.org/xml/ns/dbchangelog-ext
+          https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="0001-create-collection-with-validator" author="maksim-asonau">
+        <ext:createCollection collectionName="payments">
+            <ext:options>
+                {
+                "validator": {
+                "$jsonSchema": {
+                "bsonType": "object",
+                "required": ["order_id", "user_id", "status", "timestamp", "payment_amount"],
+                "properties": {
+                "id":             { "bsonType": "string" },
+                "event_id":       { "bsonType": ["string", "null"] },
+                "order_id":       { "bsonType": "long" },
+                "user_id":        { "bsonType": "long" },
+                "status":         { "bsonType": "string", "enum": ["SUCCESS", "FAILED"] },
+                "timestamp":      { "bsonType": "date" },
+                "payment_amount": { "bsonType": "decimal" }
+                }
+                }
+                },
+                "validationLevel": "strict",
+                "validationAction": "error"
+                }
+            </ext:options>
+        </ext:createCollection>
+    </changeSet>
+
+    <changeSet id="0002-create-indexes" author="maksim-asonau">
+        <!-- partial unique по event_id -->
+        <ext:createIndex collectionName="payments">
+            <ext:keys>{ "event_id": 1 }</ext:keys>
+            <ext:options>{
+                "name": "ux_payments_event_id",
+                "unique": true,
+                "partialFilterExpression": { "event_id": { "$exists": true } }
+                }</ext:options>
+        </ext:createIndex>
+
+        <!-- order_id -->
+        <ext:createIndex collectionName="payments">
+            <ext:keys>{ "order_id": 1 }</ext:keys>
+            <ext:options>{ "name": "idx_payments_order_id" }</ext:options>
+        </ext:createIndex>
+
+        <!-- user_id -->
+        <ext:createIndex collectionName="payments">
+            <ext:keys>{ "user_id": 1 }</ext:keys>
+            <ext:options>{ "name": "idx_payments_user_id" }</ext:options>
+        </ext:createIndex>
+
+        <!-- составной под отчёты: status + timestamp -->
+        <ext:createIndex collectionName="payments">
+            <ext:keys>{ "status": 1, "timestamp": -1 }</ext:keys>
+            <ext:options>{ "name": "idx_payments_status_timestamp" }</ext:options>
+        </ext:createIndex>
+    </changeSet>
+
+    <changeSet id="0003-uniq-success-per-order" author="maksim-asonau">
+        <ext:createIndex collectionName="payments">
+            <ext:keys>{ "order_id": 1, "status": 1 }</ext:keys>
+            <ext:options>{
+                "name": "ux_payments_one_success_per_order",
+                "unique": true,
+                "partialFilterExpression": { "status": "SUCCESS" }
+                }</ext:options>
+        </ext:createIndex>
+    </changeSet>
+
+</databaseChangeLog>

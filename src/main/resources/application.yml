@@ -1,0 +1,31 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://mongodb:27017/payments_db
+
+  liquibase:
+    enabled: true
+    change-log: db/changelog/db.changelog-master.xml
+
+  kafka:
+    bootstrap-servers: kafka:9092
+    consumer:
+      group-id: ${app.kafka.consumer-group}
+      auto-offset-reset: earliest
+
+server:
+  port: 8084
+
+app:
+  kafka:
+    orders-topic: orders
+    payments-topic: payments
+    consumer-group: payment-service-orders
+
+random-api:
+  base-url: https://www.randomnumberapi.com
+  path: /api/v1.0/random
+  min: 1
+  max: 100
+  count: 1
+  timeout-ms: 2000
