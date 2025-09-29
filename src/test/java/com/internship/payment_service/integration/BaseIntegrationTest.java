@@ -28,6 +28,7 @@ public abstract class BaseIntegrationTest {
             DockerImageName.parse("mongo:7.0");
 
     @Container
+    @ServiceConnection
     protected static final KafkaContainer KAFKA =
             new KafkaContainer(KAFKA_IMAGE).waitingFor(Wait.forListeningPort());
 
