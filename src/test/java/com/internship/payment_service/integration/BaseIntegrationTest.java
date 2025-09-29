@@ -59,8 +59,6 @@ public abstract class BaseIntegrationTest {
         r.add("app.kafka.payments-topic", () -> PAYMENTS_TOPIC);
         r.add("app.kafka.consumer-group", () -> CONSUMER_GROUP);
 
-        r.add("spring.kafka.admin.properties.bootstrap.servers", KAFKA::getBootstrapServers);
-        r.add("spring.kafka.admin.auto-create", () -> "true");
         r.add("spring.kafka.listener.missing-topics-fatal", () -> "false");
 
         r.add("spring.liquibase.enabled", () -> "true");
