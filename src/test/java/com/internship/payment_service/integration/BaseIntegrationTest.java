@@ -2,6 +2,8 @@ package com.internship.payment_service.integration;
 
 import com.internship.payment_service.PaymentServiceApplication;
 
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -14,6 +16,9 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @SpringBootTest(
         classes = PaymentServiceApplication.class,
         webEnvironment = SpringBootTest.WebEnvironment.MOCK
@@ -21,6 +26,7 @@ import org.testcontainers.utility.DockerImageName;
 @AutoConfigureMockMvc
 @Testcontainers
 @ActiveProfiles("it")
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class BaseIntegrationTest {
 
     private static final DockerImageName KAFKA_IMAGE = DockerImageName.parse("confluentinc/cp-kafka:7.5.3");
@@ -58,5 +64,29 @@ public abstract class BaseIntegrationTest {
         r.add("spring.kafka.listener.missing-topics-fatal", () -> "false");
 
         r.add("spring.liquibase.enabled", () -> "true");
+    }
+
+    @BeforeAll
+    static void awaitKafkaReadyHard() throws Exception {
+        Map<String, Object> props = new HashMap<>();
+        props.put(org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG,
+                KAFKA.getBootstrapServers());
+
+        long deadline = System.currentTimeMillis() + 60_000;
+        Exception last = null;
+        try (org.apache.kafka.clients.admin.AdminClient admin =
+                     org.apache.kafka.clients.admin.AdminClient.create(props)) {
+            while (System.currentTimeMillis() < deadline) {
+                try {
+                    admin.listTopics().names().get(2, java.util.concurrent.TimeUnit.SECONDS);
+                    return; // брокер отвечает — ок
+                } catch (Exception e) {
+                    last = e;
+                    Thread.sleep(200);
+                }
+            }
+        }
+        throw new IllegalStateException("Kafka is not reachable: " + KAFKA.getBootstrapServers(),
+                last);
     }
 }
