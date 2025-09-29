@@ -15,25 +15,25 @@ import org.testcontainers.kafka.KafkaContainer;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.DynamicPropertyRegistry;
 
-@SpringBootTest(classes = com.internship.payment_service.PaymentServiceApplication.class,
-        webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@SpringBootTest(
+        classes = com.internship.payment_service.PaymentServiceApplication.class,
+        webEnvironment = SpringBootTest.WebEnvironment.MOCK
+)
 @AutoConfigureMockMvc
 @Testcontainers
 @ActiveProfiles("it")
 public abstract class BaseIntegrationTest {
 
     private static final DockerImageName KAFKA_IMAGE =
-            DockerImageName.parse("apache/kafka:3.7.0");
+            DockerImageName.parse("apache/kafka:3.7.1"); // можно 3.7.0
     private static final DockerImageName MONGO_IMAGE =
             DockerImageName.parse("mongo:7.0");
 
     @Container
-    @ServiceConnection
     protected static final KafkaContainer KAFKA =
             new KafkaContainer(KAFKA_IMAGE).waitingFor(Wait.forListeningPort());
 
     @Container
-    @ServiceConnection
     protected static final MongoDBContainer MONGO =
             new MongoDBContainer(MONGO_IMAGE).waitingFor(Wait.forListeningPort());
 
@@ -41,14 +41,19 @@ public abstract class BaseIntegrationTest {
     protected static final String PAYMENTS_TOPIC = "payments";
     protected static final String CONSUMER_GROUP = "payment-service-it";
 
-    // Пробрасываем ТОЛЬКО свои app.* (spring.* подставит @ServiceConnection)
+    // ВАЖНО: подставляем ТОЛЬКО эти два spring.* через контейнеры.
     @DynamicPropertySource
-    static void appProps(DynamicPropertyRegistry r) {
+    static void props(DynamicPropertyRegistry r) {
+        r.add("spring.kafka.bootstrap-servers", KAFKA::getBootstrapServers);
+        r.add("spring.data.mongodb.uri", () -> MONGO.getConnectionString() + "/payments_db");
+
+        // свои app.* и флаги
         r.add("app.kafka.orders-topic", () -> ORDERS_TOPIC);
         r.add("app.kafka.payments-topic", () -> PAYMENTS_TOPIC);
         r.add("app.kafka.consumer-group", () -> CONSUMER_GROUP);
-        r.add("spring.liquibase.enabled", () -> "true");
+
         r.add("spring.kafka.listener.auto-startup", () -> "true");
         r.add("spring.kafka.listener.missing-topics-fatal", () -> "false");
+        r.add("spring.liquibase.enabled", () -> "true");
     }
 }
