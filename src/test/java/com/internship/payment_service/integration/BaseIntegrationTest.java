@@ -42,6 +42,11 @@ public abstract class BaseIntegrationTest {
             new MongoDBContainer(MONGO_IMAGE)
                     .waitingFor(Wait.forListeningPort());
 
+    static {
+        KAFKA.start();
+        MONGO.start();
+    }
+
     protected static final String ORDERS_TOPIC = "orders";
     protected static final String PAYMENTS_TOPIC = "payments";
     protected static final String CONSUMER_GROUP = "payment-service-it";
