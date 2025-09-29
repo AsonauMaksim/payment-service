@@ -29,6 +29,3 @@ random-api:
   max: 100
   count: 1
   timeout-ms: 2000
-
-
-
