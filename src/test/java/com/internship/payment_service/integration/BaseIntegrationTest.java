@@ -23,12 +23,11 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 public abstract class BaseIntegrationTest {
 
     private static final DockerImageName KAFKA_IMAGE =
-            DockerImageName.parse("confluentinc/cp-kafka:7.6.1"); // можно оставить 7.5.3
+            DockerImageName.parse("apache/kafka:3.7.0");
     private static final DockerImageName MONGO_IMAGE =
             DockerImageName.parse("mongo:7.0");
 
     @Container
-    @ServiceConnection
     protected static final KafkaContainer KAFKA =
             new KafkaContainer(KAFKA_IMAGE).waitingFor(Wait.forListeningPort());
 
