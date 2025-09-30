@@ -122,12 +122,6 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-testcontainers</artifactId>
-            <scope>test</scope>
-        </dependency>
-
         <!-- WireMock для стаба внешнего API -->
         <dependency>
             <groupId>org.wiremock</groupId>
@@ -177,7 +171,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Surefire -->
+            <!-- Surefire (как в order-service) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
