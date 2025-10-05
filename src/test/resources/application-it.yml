@@ -1,0 +1,17 @@
+spring:
+  main:
+    banner-mode: "off"
+
+  kafka:
+    listener:
+      auto-startup: true
+
+  liquibase:
+    enabled: true
+
+logging:
+  level:
+    root: WARN
+    org.springframework.data.mongodb: INFO
+    org.springframework.kafka: INFO
+    com.internship.payment_service: DEBUG

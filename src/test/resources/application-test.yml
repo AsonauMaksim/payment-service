@@ -1,0 +1,31 @@
+spring:
+  main:
+    banner-mode: "off"
+
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
+
+  kafka:
+    bootstrap-servers: localhost:0
+    listener:
+      auto-startup: false
+
+  liquibase:
+    enabled: false
+
+logging:
+  level:
+    root: WARN
+    org.springframework.kafka: INFO
+    org.springframework.data.mongodb: INFO
+    com.internship.payment_service: DEBUG
+
+random-api:
+  base-url: http://localhost:8089
+  path: /api/v1/random
+  min: 1
+  max: 100
+  count: 1
+  timeout-ms: 2000
