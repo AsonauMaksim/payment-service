@@ -2,7 +2,7 @@ name: Payment Service CI Pipeline
 
 on:
   push:
-    branches: [ main, feature/payment-service-* ]
+    branches: [ main, feature/payment-service-*, feature/add-actuator ]
   pull_request:
     branches: [ main ]
 
